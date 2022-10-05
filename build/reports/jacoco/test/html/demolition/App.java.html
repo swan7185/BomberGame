@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Demolition</a> &gt; <a href="index.source.html" class="el_package">demolition</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package demolition;
+
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import processing.core.PApplet;
+import processing.core.PFont;
+import processing.core.PImage;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+<span class="fc" id="L19">class LevelConfig {</span>
+  private String path;
+  private int time;
+
+  public String getPath() {
+<span class="fc" id="L24">    return path;</span>
+  }
+
+  public int getTime() {
+<span class="fc" id="L28">    return time;</span>
+  }
+}
+
+<span class="fc" id="L32">class Config {</span>
+  private List&lt;LevelConfig&gt; levels;
+  private int lives;
+
+  public List&lt;LevelConfig&gt; getLevels() {
+<span class="fc" id="L37">    return levels;</span>
+  }
+
+  public int getLives() {
+<span class="fc" id="L41">    return lives;</span>
+  }
+}
+
+public class App extends PApplet {
+  public static final int TOP_HEIGHT = 2;
+  public static final int WIDTH = 15;
+  public static final int HEIGHT = 15;
+
+  // frame per second
+  public static final int FPS = 60;
+  public static final int GRID_SIZE = 32;
+<span class="fc" id="L53">  List&lt;Bomb&gt; bombList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L54">  int pressedKeyCode = -1;</span>
+  private int level;
+  private Map map;
+  private BombGuy bombGuy;
+  private TopBar topBar;
+  private int seconds;
+  private Config config;
+  private PFont font;
+  private YellowEnemy yellowEnemy;
+  private RedEnemy redEnemy;
+<span class="fc" id="L64">  private int gameStatus = 0;</span>
+
+<span class="fc" id="L66">  public App() {}</span>
+
+  public static void main(String[] args) {
+<span class="nc" id="L69">    PApplet.main(&quot;demolition.App&quot;);</span>
+<span class="nc" id="L70">  }</span>
+
+  public List&lt;Bomb&gt; getBombList() {
+<span class="fc" id="L73">    return bombList;</span>
+  }
+
+  public void setTopBar(TopBar topBar) {
+<span class="fc" id="L77">    this.topBar = topBar;</span>
+<span class="fc" id="L78">  }</span>
+
+  public int getGameStatus() {
+<span class="fc" id="L81">    return gameStatus;</span>
+  }
+
+  public int getSeconds() {
+<span class="fc" id="L85">    return seconds;</span>
+  }
+
+  public void setSeconds(int seconds) {
+<span class="fc" id="L89">    this.seconds = seconds;</span>
+<span class="fc" id="L90">  }</span>
+
+  public Config getConfig() {
+<span class="fc" id="L93">    return config;</span>
+  }
+
+  public BombGuy getBombGuy() {
+<span class="fc" id="L97">    return bombGuy;</span>
+  }
+
+  public void setBombGuy(BombGuy bombGuy) {
+<span class="fc" id="L101">    this.bombGuy = bombGuy;</span>
+<span class="fc" id="L102">  }</span>
+
+  public YellowEnemy getYellowEnemy() {
+<span class="fc" id="L105">    return yellowEnemy;</span>
+  }
+
+  public void setYellowEnemy(YellowEnemy yellowEnemy) {
+<span class="fc" id="L109">    this.yellowEnemy = yellowEnemy;</span>
+<span class="fc" id="L110">  }</span>
+
+  public RedEnemy getRedEnemy() {
+<span class="fc" id="L113">    return redEnemy;</span>
+  }
+
+  public void setRedEnemy(RedEnemy redEnemy) {
+<span class="fc" id="L117">    this.redEnemy = redEnemy;</span>
+<span class="fc" id="L118">  }</span>
+
+  public int getLevel() {
+<span class="fc" id="L121">    return level;</span>
+  }
+
+  public void setLevel(int level) {
+<span class="fc" id="L125">    this.level = level;</span>
+<span class="fc" id="L126">  }</span>
+
+  public Map getMap() {
+<span class="fc" id="L129">    return map;</span>
+  }
+
+  public void setMap(Map map) {
+<span class="fc" id="L133">    this.map = map;</span>
+<span class="fc" id="L134">  }</span>
+
+  public void settings() {
+<span class="nc" id="L137">    size(480, HEIGHT * GRID_SIZE);</span>
+<span class="nc" id="L138">  }</span>
+
+  public PImage loadResourceImg(String path) {
+<span class="nc" id="L141">    URL resource = getClass().getClassLoader().getResource(path);</span>
+<span class="nc" id="L142">    return loadImage(resource.getPath());</span>
+  }
+
+  public void init() {
+<span class="fc" id="L146">    bombList.clear();</span>
+<span class="fc" id="L147">    map.init();</span>
+<span class="fc" id="L148">    bombGuy.init();</span>
+<span class="fc" id="L149">    yellowEnemy.init();</span>
+<span class="fc" id="L150">    redEnemy.init();</span>
+<span class="fc" id="L151">    topBar.init();</span>
+<span class="fc" id="L152">    this.seconds = this.config.getLevels().get(this.level - 1).getTime();</span>
+<span class="fc" id="L153">  }</span>
+
+  public void loadConfig(String path) {
+    try {
+<span class="fc" id="L157">      Gson json = new Gson();</span>
+<span class="fc" id="L158">      JsonReader reader = null;</span>
+<span class="fc" id="L159">      File f = new File(path);</span>
+<span class="fc" id="L160">      reader = new JsonReader(new FileReader(f));</span>
+<span class="fc" id="L161">      config = json.fromJson(reader, Config.class);</span>
+<span class="fc" id="L162">      reader.close();</span>
+<span class="nc" id="L163">    } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L164">      e.printStackTrace();</span>
+<span class="nc" id="L165">    } catch (IOException e) {</span>
+<span class="nc" id="L166">      e.printStackTrace();</span>
+<span class="pc" id="L167">    }</span>
+<span class="fc" id="L168">  }</span>
+
+  public void setup() {
+<span class="nc" id="L171">    loadConfig(Paths.get(System.getProperty(&quot;user.dir&quot;), &quot;config.json&quot;).toString());</span>
+<span class="nc" id="L172">    this.level = 1;</span>
+<span class="nc" id="L173">    font = createFont(&quot;PressStart2P-Regular.ttf&quot;, 18);</span>
+<span class="nc" id="L174">    frameRate(FPS);</span>
+    // set up map
+<span class="nc" id="L176">    map = new Map(this, true);</span>
+<span class="nc" id="L177">    bombGuy = new BombGuy(this, config.getLives(), true);</span>
+<span class="nc" id="L178">    yellowEnemy = new YellowEnemy(this, true);</span>
+<span class="nc" id="L179">    redEnemy = new RedEnemy(this, true);</span>
+<span class="nc" id="L180">    topBar = new TopBar(this, true);</span>
+<span class="nc" id="L181">    init();</span>
+
+<span class="nc" id="L183">  }</span>
+
+  @Override
+  public void keyReleased() {
+<span class="nc" id="L187">    this.onKeyReleased();</span>
+<span class="nc" id="L188">  }</span>
+
+  public void onKeyReleased() {
+<span class="fc bfc" id="L191" title="All 8 branches covered.">    if (pressedKeyCode == DOWN || pressedKeyCode == UP || pressedKeyCode == LEFT || pressedKeyCode == RIGHT) {</span>
+<span class="fc" id="L192">      bombGuy.move();</span>
+    }
+<span class="fc" id="L194">    pressedKeyCode = -1;</span>
+<span class="fc" id="L195">  }</span>
+
+  public void onKeyPressed(boolean isLoadImage) {
+<span class="fc bfc" id="L198" title="All 2 branches covered.">    if (pressedKeyCode == DOWN) {</span>
+<span class="fc" id="L199">      bombGuy.setOrientation(0);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">    } else if (pressedKeyCode == LEFT) {</span>
+<span class="fc" id="L201">      bombGuy.setOrientation(1);</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">    } else if (pressedKeyCode == UP) {</span>
+<span class="fc" id="L203">      bombGuy.setOrientation(2);</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">    } else if (pressedKeyCode == RIGHT) {</span>
+<span class="fc" id="L205">      bombGuy.setOrientation(3);</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">    } else if (pressedKeyCode == ' ') {</span>
+<span class="fc" id="L207">      Bomb bomb = new Bomb(this);</span>
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">      if (isLoadImage) {</span>
+<span class="nc" id="L209">        bomb.loadImages();</span>
+      }
+<span class="fc" id="L211">      bombList.add(bomb);</span>
+<span class="fc" id="L212">      bomb.setPosition(bombGuy.getX(), bombGuy.getY());</span>
+    }
+<span class="fc" id="L214">  }</span>
+
+  public void setPressedKeyCode(int pressedKeyCode) {
+<span class="fc" id="L217">    this.pressedKeyCode = pressedKeyCode;</span>
+<span class="fc" id="L218">  }</span>
+
+  @Override
+  public void keyPressed() {
+<span class="nc" id="L222">    pressedKeyCode = keyCode;</span>
+<span class="nc" id="L223">    onKeyPressed(true);</span>
+<span class="nc" id="L224">  }</span>
+
+  public void levelUp() {
+<span class="fc bfc" id="L227" title="All 2 branches covered.">    if (this.level == 2) {</span>
+      // win
+<span class="fc" id="L229">      gameStatus = 1;</span>
+    } else {
+<span class="fc" id="L231">      this.level++;</span>
+<span class="fc" id="L232">      init();</span>
+    }
+<span class="fc" id="L234">  }</span>
+
+  public void tick(boolean draw) {
+<span class="fc bfc" id="L237" title="All 2 branches covered.">    if (gameStatus == -1) {</span>
+<span class="fc" id="L238">      return;</span>
+    }
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">    if (draw) {</span>
+<span class="nc" id="L241">      this.clear();</span>
+<span class="nc" id="L242">      background(255, 121, 0);</span>
+    }
+<span class="pc bpc" id="L244" title="1 of 4 branches missed.">    if (bombGuy.getLives() &lt;= 0 || this.seconds &lt;= 0) {</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">      if (draw) {</span>
+<span class="nc" id="L246">        drawText(&quot;GAME OVER&quot;, WIDTH / 3 * GRID_SIZE, HEIGHT / 2 * GRID_SIZE, 20);</span>
+      }
+<span class="fc" id="L248">      gameStatus = -1;</span>
+<span class="fc" id="L249">      return;</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">    } else if (gameStatus == 1) {</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">      if (draw) {</span>
+<span class="nc" id="L252">        drawText(&quot;YOU WIN&quot;, WIDTH / 3 * GRID_SIZE, HEIGHT / 2 * GRID_SIZE, 20);</span>
+      }
+<span class="fc" id="L254">      gameStatus = -1;</span>
+<span class="fc" id="L255">      return;</span>
+    }
+<span class="fc" id="L257">    map.tick(draw);</span>
+<span class="fc" id="L258">    Iterator&lt;Bomb&gt; iterator = bombList.iterator();</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">    while (iterator.hasNext()) {</span>
+<span class="fc" id="L260">      Bomb bomb = iterator.next();</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">      if (bomb.getBombStatus().equals(&quot;close&quot;)) {</span>
+<span class="fc" id="L262">        iterator.remove();</span>
+      } else {
+<span class="fc" id="L264">        bomb.tick(draw);</span>
+      }
+<span class="fc" id="L266">    }</span>
+<span class="fc" id="L267">    topBar.tick(draw);</span>
+<span class="fc" id="L268">    bombGuy.tick(draw);</span>
+<span class="fc" id="L269">    yellowEnemy.tick(draw);</span>
+<span class="fc" id="L270">    redEnemy.tick(draw);</span>
+<span class="fc bfc" id="L271" title="All 2 branches covered.">    if (!bombGuy.isAlive()) {</span>
+<span class="fc" id="L272">      init();</span>
+    }
+<span class="fc" id="L274">  }</span>
+
+  public void drawText(String text, int x, int y, int size) {
+<span class="nc" id="L277">    textFont(font, size);</span>
+<span class="nc" id="L278">    fill(0);</span>
+<span class="nc" id="L279">    text(text, x, y);</span>
+<span class="nc" id="L280">  }</span>
+
+  @Override
+  public void draw() {
+<span class="nc" id="L284">    tick(true);</span>
+<span class="nc" id="L285">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

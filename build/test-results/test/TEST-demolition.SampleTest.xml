@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="demolition.SampleTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2021-11-06T06:24:15" hostname="bogon" time="0.319">
+  <properties/>
+  <testcase name="testYellowEnemyOrientation()" classname="demolition.SampleTest" time="0.229"/>
+  <testcase name="TestBombMoveableObject()" classname="demolition.SampleTest" time="0.018"/>
+  <testcase name="simpleTest()" classname="demolition.SampleTest" time="0.001"/>
+  <testcase name="testWin()" classname="demolition.SampleTest" time="0.005"/>
+  <testcase name="testBomb()" classname="demolition.SampleTest" time="0.006"/>
+  <testcase name="testYellowEnemyInit()" classname="demolition.SampleTest" time="0.004"/>
+  <testcase name="testRedEnemyOrientation()" classname="demolition.SampleTest" time="0.005"/>
+  <testcase name="testRedEnemyInit()" classname="demolition.SampleTest" time="0.002"/>
+  <testcase name="TestEnemyMeet()" classname="demolition.SampleTest" time="0.015"/>
+  <testcase name="TestMeetEnemy()" classname="demolition.SampleTest" time="0.003"/>
+  <testcase name="testBombGuyInit()" classname="demolition.SampleTest" time="0.004"/>
+  <testcase name="testBombGuyMove()" classname="demolition.SampleTest" time="0.002"/>
+  <testcase name="testMapTarget()" classname="demolition.SampleTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
